@@ -1,0 +1,24 @@
+* {
+    font-family: 'Kanit', sans-serif;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+}
+
+main {
+    height: 84%;
+}
+
+header {
+    background-image: linear-gradient(to right, red , yellow);
+    height: 8%;
+}
+
+footer {
+    height: 8%;
+}
