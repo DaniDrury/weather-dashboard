@@ -33,9 +33,10 @@ function getLatLon(city) {
         if (!response.ok) {
             throw new Error('Failed to load weather data.');
         }
-        return response.json();
+        let possibleCities = response.json();
+        return possibleCities;
         })
-        .then(whichCity(response.json()))
+        .then(whichCity(possibleCities))
     .catch(function (error) {
         console.error(error);
     });
