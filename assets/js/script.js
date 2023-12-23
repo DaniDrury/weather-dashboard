@@ -1,21 +1,65 @@
 const apiKey = '75d1b0e8f45a5b8907dd772ac1d040f2';
-let cityInput = document.getElementById('cityInput');
-let searchForm = document.querySelector('form');
-// let resultsEl = document.querySelector('article');
-let cardContainer = document.getElementById('cityOptCardContainer')
-
-let city;
-// let state;
-// let country;
-let lat = 38.49726;
-let lon = -123.00357;
+const searchForm = document.querySelector('form');
 
 //api call
-let queryURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + apiKey;
+// const queryURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + apiKey;
+
+function displayCityDetails(ev) {
+    document.getElementById('cityOptCardContainer').setAttribute('hidden','');
+}
+
+function whichCity(response) {
+    // reset container from previous searches
+    document.querySelector('h3').textContent = '';
+    const cityCardContainer = document.getElementById('cityOptCardContainer');
+    cityCardContainer.innerHTML = '';
+
+    cityCardContainer.insertAdjacentHTML('afterbegin','<h3>Select City:</h3>');
+    
+    for (let i = 0; i < response.length; i++) {
+        // deconstruct response object
+        const {
+            name,
+            state,
+            country,
+            lat,
+            lon
+        } = response[i];
+
+        const cityCard = `
+            <div class = 'card w-25 mb-1 me-1'>
+                <div class = 'card-body'>
+                    <p>${name}, ${state}, ${country}</p>
+                </div>
+            </div>
+        `
+        cityCardContainer.removeAttribute('hidden');
+        cityCardContainer.insertAdjacentHTML('beforeend', cityCard);
+        // cityCard.addEventListener('click', displayCityDetails);
+    }
+}
+
+async function getLatLon(city) {
+    const coordinatesQuery = 'http://api.openweathermap.org/geo/1.0/direct?q=' + city + '&limit=5&appid=' + apiKey;
+
+    try {
+        const response = await fetch(coordinatesQuery);
+        const resultsData = await response.json();
+        if (resultsData.length > 1) {
+            whichCity(resultsData);
+        } else {
+            displayCityDetails(resultsData);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
 
 //Search Form Submit Handler Function
 function handleSearchSubmit(event) {
     event.preventDefault();
+
+    const cityInput = document.getElementById('cityInput');
 
     city = cityInput.value;
     if (!city) {
@@ -26,63 +70,5 @@ function handleSearchSubmit(event) {
     getLatLon(city);
 }
 
-function getLatLon(city) {
-    let coordinatesQuery = 'http://api.openweathermap.org/geo/1.0/direct?q=' + city + '&limit=5&appid=' + apiKey;
-
-    fetch(coordinatesQuery).then(function(response) {
-        if (!response.ok) {
-            throw new Error('Failed to load weather data.');
-        }
-        let possibleCities = response.json();
-        return possibleCities;
-        })
-        .then(whichCity(possibleCities))
-    .catch(function (error) {
-        console.error(error);
-    });
-}
-
-// function fetchAPI(queryURL) {
-//     //fetch api data
-//     fetch(queryURL).then(function(response) {
-//         if (!response.ok) {
-//             throw new Error('Failed to load weather data.');
-//         }
-//         return response.json();
-//         })
-//         .then(function (weatherData) {
-//             console.log(weatherData);
-//             console.log('test');
-//             whichCity(weatherData);
-//         })
-//     .catch(function (error) {
-//         console.error(error);
-//     });
-// }
-
-function whichCity(response) {
-    console.log('test');
-    for (let i=0; i < response.length; i++) {
-        let cityOpt = response.name;
-        let stateOpt = response.state;
-        let countryOpt = response.country;
-        let lat = response.lat;
-        let lon = response.lon;
-        
-        let cityOptCard = document.createElement('div');
-        cityOptCard.className ='card';
-        
-        let cardBody = document.createElement('div');
-        cardBody.className = 'card-body';
-
-        resultsEl.appendChild(cityOptCard);
-    }
-}
-
-
-searchForm.addEventListener('submit',handleSearchSubmit);
-
-
-// var searchInputVal = document.querySelector('#search-input').value;
-// searchApi(searchInputVal, formatInputVal);
+searchForm.addEventListener('submit', handleSearchSubmit);
 

@@ -2,23 +2,23 @@
     font-family: 'Kanit', sans-serif;
 }
 
-html {
+/* html {
     height: 100%;
-}
+} */
 
 body {
-    height: 100%;
+    height: 100vh;
 }
 
 main {
-    height: 84%;
+    height: 85%;
 }
 
 header {
     background-image: linear-gradient(to right, red , yellow);
-    height: 8%;
+    height: 10%;
 }
 
 footer {
-    height: 8%;
+    height: 5%;
 }
