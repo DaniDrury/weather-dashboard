@@ -15,7 +15,7 @@ function whichCity(response) {
     cityCardContainer.innerHTML = '';
 
     cityCardContainer.insertAdjacentHTML('afterbegin','<h3>Select City:</h3>');
-    
+
     for (let i = 0; i < response.length; i++) {
         // deconstruct response object
         const {
@@ -27,7 +27,7 @@ function whichCity(response) {
         } = response[i];
 
         const cityCard = `
-            <div class = 'card w-25 mb-1 me-1'>
+            <div class = 'card w-25 mb-1 me-1' id = 'cityCard${i}'>
                 <div class = 'card-body'>
                     <p>${name}, ${state}, ${country}</p>
                 </div>
@@ -35,7 +35,9 @@ function whichCity(response) {
         `
         cityCardContainer.removeAttribute('hidden');
         cityCardContainer.insertAdjacentHTML('beforeend', cityCard);
-        // cityCard.addEventListener('click', displayCityDetails);
+        
+        //add eventlistener to the cityCard
+        document.getElementById(`cityCard${i}`).addEventListener('click', displayCityDetails);
     }
 }
 
