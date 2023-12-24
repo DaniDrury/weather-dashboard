@@ -4,8 +4,44 @@ const searchForm = document.querySelector('form');
 //api call
 // const queryURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + apiKey;
 
-function displayCityDetails(ev) {
+function displayWeatherDetails(current, forecast) {
+    // deconstruct current weather data
+    const currentWeather = {
+        temp: current.main.temp,
+        humidity: current.main.humidity,
+        wind: current.wind.speed
+    };
+    
+    // deconstruct forecast weather data
+    for (let i = 0; i < forecast.list.length; i++) {
+        const forecastWeather = {
+            temp: forecast.list[i].main.temp,
+            humidity: forecast.list[i].main.humidity,
+            wind: forecast.list[i].wind.speed
+        }
+    }
+}
+
+async function fetchCityDetails(ev) {
     document.getElementById('cityOptCardContainer').setAttribute('hidden','');
+
+    // get specific lat & lon for chosen city
+    const lat = this.dataset.lat;
+    const lon = this.dataset.lon;
+
+    // api call for current weather data
+    const currentWeatherURL = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`;
+    const currentResponse = await fetch(currentWeatherURL);
+    const currentDetails = await currentResponse.json();
+
+    // api call for 5-day forecast data
+    const fiveDayURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + apiKey + '&units=imperial';
+    const fiveDayResponse = await fetch(fiveDayURL);
+    const forecastDetails = await fiveDayResponse.json();
+
+    console.log(currentDetails, forecastDetails);
+
+    displayWeatherDetails(currentDetails, forecastDetails);
 }
 
 function whichCity(response) {
@@ -22,35 +58,35 @@ function whichCity(response) {
             name,
             state,
             country,
-            lat,
-            lon
+            lon,
+            lat
         } = response[i];
 
-        const cityCard = `
-            <div class = 'card w-25 mb-1 me-1' id = 'cityCard${i}'>
-                <div class = 'card-body'>
-                    <p>${name}, ${state}, ${country}</p>
-                </div>
-            </div>
+        const cityBtn = `
+            <button type="button" class = "btn btn-info btn-lg" id = "cityBtn${i}" data-lon = '${lon}' data-lat = '${lat}'>
+                ${name}, ${state}, ${country}
+            </button>
         `
+
         cityCardContainer.removeAttribute('hidden');
-        cityCardContainer.insertAdjacentHTML('beforeend', cityCard);
+        cityCardContainer.insertAdjacentHTML('beforeend', cityBtn);
         
         //add eventlistener to the cityCard
-        document.getElementById(`cityCard${i}`).addEventListener('click', displayCityDetails);
+        document.getElementById(`cityBtn${i}`).addEventListener('click', fetchCityDetails);
     }
 }
 
-async function getLatLon(city) {
+async function getCityResponse(city) {
     const coordinatesQuery = 'http://api.openweathermap.org/geo/1.0/direct?q=' + city + '&limit=5&appid=' + apiKey;
 
     try {
         const response = await fetch(coordinatesQuery);
         const resultsData = await response.json();
+        console.log(resultsData);
         if (resultsData.length > 1) {
             whichCity(resultsData);
         } else {
-            displayCityDetails(resultsData);
+            fetchCityDetails(resultsData);
         }
     } catch (error) {
         console.error(error);
@@ -69,7 +105,7 @@ function handleSearchSubmit(event) {
         return;
     }
 
-    getLatLon(city);
+    getCityResponse(city);
 }
 
 searchForm.addEventListener('submit', handleSearchSubmit);

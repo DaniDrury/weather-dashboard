@@ -28,16 +28,16 @@
             <section id="searchHistory"></section>
         </aside>
         <article class="col-12 col-md-9 col-lg-10 p-3">
-            <section id="cityOptCardContainer" class="row p-2" hidden></section>
-            <section class="m-2 h-50 p-2">
+            <section id="cityOptCardContainer" class="p-2" hidden></section>
+            <section class="m-2 h-50 p-2" hidden>
                 <h2 id="cityDate"></h2>
-                <p id="temp"></p>
-                <p id="wind"></p>
-                <p id="humidity"></p>
+                <p id="temp">Temp: <span id = "tempSpan"></span></p>
+                <p id="wind">Wind: <span id = "windSpan"></span></p>
+                <p id="humidity">Humidity: <span id = "humiditySpan"></span></p>
             </section>
-            <section>
-                <h3 id="5-dayTitle" class="invisible">5-Day Weather Forecast</h3>
-                <div id="cardContainer" class="container"></div>
+            <section hidden>
+                <h3 id="5-dayTitle">5-Day Weather Forecast</h3>
+                <div id="5dayCardContainer" class="container"></div>
             </section>
         </article>
     </main>
