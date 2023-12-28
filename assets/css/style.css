@@ -22,3 +22,12 @@ header {
 footer {
     height: 5%;
 }
+
+.cityBtns {
+    width: 20%;
+}
+
+.forecastCards {
+    width: 15%;
+    gap: 1em;
+}

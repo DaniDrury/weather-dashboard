@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +18,7 @@
     <header class="d-flex justify-content-center align-items-center">
         <h1 class="fw-bold">Weather Dashboard</h1>
     </header>
+
     <main class="d-flex flex-wrap justify-content-center">
         <aside class="col-12 col-md-3 col-lg-2 p-3">
             <h2>Search for a City:</h2>
@@ -28,22 +30,14 @@
             <section id="searchHistory"></section>
         </aside>
         <article class="col-12 col-md-9 col-lg-10 p-3">
-            <section id="cityOptCardContainer" class="p-2" hidden></section>
-            <section class="m-2 h-50 p-2" hidden>
-                <h2 id="cityDate"></h2>
-                <p id="temp">Temp: <span id = "tempSpan"></span></p>
-                <p id="wind">Wind: <span id = "windSpan"></span></p>
-                <p id="humidity">Humidity: <span id = "humiditySpan"></span></p>
-            </section>
-            <section hidden>
-                <h3 id="5-dayTitle">5-Day Weather Forecast</h3>
-                <div id="5dayCardContainer" class="container"></div>
-            </section>
+            <section id="cardContainer" class="row px-3"></section>
         </article>
     </main>
+
     <footer class="text-center">
         <p>&copy DND Wed Development 2023</p>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>

@@ -1,30 +1,79 @@
 const apiKey = '75d1b0e8f45a5b8907dd772ac1d040f2';
 const searchForm = document.querySelector('form');
+const cardContainer = document.getElementById('cardContainer');
 
 //api call
 // const queryURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + apiKey;
 
 function displayWeatherDetails(current, forecast) {
-    // deconstruct current weather data
+    // reset cardContainer
+    cardContainer.innerHTML = '';
+
+    // destructure current weather data
     const currentWeather = {
+        city: current.name,
         temp: current.main.temp,
         humidity: current.main.humidity,
         wind: current.wind.speed
     };
 
-    // deconstruct forecast weather data
+    // get current date using day.js
+    const today = dayjs();
+
+    // construct current weather card
+    const currentWeatherHTML = `
+        <div class = "card w-75 px-2 mb-2">
+            <div class = "card-header">
+                <h3>${city} (${today.format("MM/DD/YYYY")})</h3>
+            </div>
+            <div class = "card-body">
+                <p>Temp: ${currentWeather.temp}°</p>
+                <p>Wind: ${currentWeather.wind}mph</p>
+                <p>Humidity: ${currentWeather.humidity}%</p>
+            </div>
+        </div>
+        <h4>5-Day Forecast:</h4>`
+    // insert current weather card HTML
+    cardContainer.insertAdjacentHTML('afterbegin', currentWeatherHTML);
+
+    console.log(forecast);
+    // destructure forecast weather data, create and insert cards
     for (let i = 0; i < forecast.list.length; i++) {
+        // destructure
         const forecastWeather = {
+            city: forecast.city.name,
             temp: forecast.list[i].main.temp,
             humidity: forecast.list[i].main.humidity,
-            wind: forecast.list[i].wind.speed
+            wind: forecast.list[i].wind.speed,
+            date: forecast.list[i].dt_txt,
+            // time: forecast.list[i].dt
+        }
+
+        const slicedDate = forecastWeather.date.slice(0, 10);
+        const forecastDate = dayjs(slicedDate);
+
+        const slicedTime = forecastWeather.date.slice(11);
+        console.log(slicedTime);
+
+        if (slicedTime == '12:00:00') {
+            const forecastHTML = `
+                <div class = "card forecastCards">
+                    <div class = "card-header">
+                        <h4>${forecastDate.format("MM/DD/YYYY")}</h4>
+                    </div>
+                    <div class = "card-body">
+                        <p>Temp: ${forecastWeather.temp}°</p>
+                        <p>Wind: ${forecastWeather.wind}mph</p>
+                        <p>Humidity: ${forecastWeather.humidity}%</p>
+                    </div>
+                </div>`
+
+            cardContainer.insertAdjacentHTML('beforeend', forecastHTML);
         }
     }
 }
 
 async function fetchCityDetails(ev) {
-    document.getElementById('cityOptCardContainer').setAttribute('hidden', '');
-
     // get specific lat & lon for chosen city
     const lat = this.dataset.lat;
     const lon = this.dataset.lon;
@@ -40,21 +89,18 @@ async function fetchCityDetails(ev) {
     const fiveDayResponse = await fetch(fiveDayURL);
     const forecastDetails = await fiveDayResponse.json();
 
-    console.log(currentDetails, forecastDetails);
-
     displayWeatherDetails(currentDetails, forecastDetails);
 }
 
 function whichCity(response) {
     // reset container from previous searches
-    document.querySelector('h3').textContent = '';
-    const cityCardContainer = document.getElementById('cityOptCardContainer');
-    cityCardContainer.innerHTML = '';
+    // document.querySelector('h3').textContent = '';
+    cardContainer.innerHTML = '';
 
-    cityCardContainer.insertAdjacentHTML('afterbegin', '<h3>Select City:</h3>');
+    cardContainer.insertAdjacentHTML('afterbegin', '<h3>Select City:</h3>');
 
     for (let i = 0; i < response.length; i++) {
-        // deconstruct response object
+        // destructure response object
         const {
             name,
             state,
@@ -64,13 +110,13 @@ function whichCity(response) {
         } = response[i];
 
         const cityBtn = `
-            <button type="button" class = "btn btn-info btn-lg" id = "cityBtn${i}" data-lon = '${lon}' data-lat = '${lat}'>
+            <button type="button" class = "btn btn-info btn-lg m-1 cityBtns" id = "cityBtn${i}" data-lon = '${lon}' data-lat = '${lat}'>
                 ${name}, ${state}, ${country}
             </button>
         `
 
-        cityCardContainer.removeAttribute('hidden');
-        cityCardContainer.insertAdjacentHTML('beforeend', cityBtn);
+        // cardContainer.removeAttribute('hidden');
+        cardContainer.insertAdjacentHTML('beforeend', cityBtn);
 
         //add eventlistener to the cityCard
         document.getElementById(`cityBtn${i}`).addEventListener('click', fetchCityDetails);
@@ -86,7 +132,7 @@ async function getCityResponse(city) {
         if (resultsData.length > 1) {
             whichCity(resultsData);
         } else {
-            // deconstruct specific city object
+            // destructure specific city object
             const {
                 lon,
                 lat
@@ -101,8 +147,6 @@ async function getCityResponse(city) {
             const fiveDayURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + apiKey + '&units=imperial';
             const fiveDayResponse = await fetch(fiveDayURL);
             const forecastDetails = await fiveDayResponse.json();
-
-            console.log(currentDetails, forecastDetails);
 
             displayWeatherDetails(currentDetails, forecastDetails);
         }
