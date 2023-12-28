@@ -23,11 +23,15 @@ footer {
     height: 5%;
 }
 
+.historyBtns {
+
+}
+
 .cityBtns {
-    width: 20%;
+    width: 15%;
 }
 
 .forecastCards {
-    width: 15%;
+    max-width: 15%;
     gap: 1em;
 }

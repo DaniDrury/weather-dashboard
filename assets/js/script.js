@@ -1,43 +1,59 @@
 const apiKey = '75d1b0e8f45a5b8907dd772ac1d040f2';
 const searchForm = document.querySelector('form');
 const cardContainer = document.getElementById('cardContainer');
-let historyArr = [];
+const historyArr = JSON.parse(localStorage.getItem('savedSearches'));
+const modalEl = document.getElementById('errorModal');
+const myModal = new bootstrap.Modal(modalEl);
 
-//api call
-// const queryURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + apiKey;
+
+function renderSearchHistory() {
+    const searchHistoryContainer = document.getElementById('searchHistory');
+    searchHistoryContainer.innerHTML = '';
+
+    for (i = historyArr.length - 1; i >= 0; i--) {
+        const {
+            city,
+            state,
+            country,
+            lon,
+            lat
+        } = historyArr[i];
+
+        const historyBtn = `
+            <button type="button" class = "btn btn-info btn-md my-1 historyBtns w-100" id = "historyBtn${i}" data-lon = '${lon}' data-lat = '${lat}'
+            data-name = '${city}' data-state = '${state}' data-country = '${country}'>
+                ${city}, ${state}, ${country}
+            </button>
+        `
+        searchHistoryContainer.insertAdjacentHTML('beforeend', historyBtn);
+
+        //add eventlistener to the History Buttons
+        document.getElementById(`historyBtn${i}`).addEventListener('click', fetchCityDetails);
+    }
+}
 
 function saveSearch(city) {
-        // create local storage object and save to local storage
-        const historyObj = {
-            city: city.name,
-            state: city.state,
-            country: city.country,
-            lon: city.lon,
-            lat: city.lat,
-        }
-    
-        historyArr.push(historyObj);
-        if (historyArr.length > 10) {
-            historyArr.shift();
-        }
-    
-        localStorage.setItem("savedSearches", JSON.stringify(historyArr));
+    // create local storage object and save to local storage
+    const historyObj = {
+        city: city.name,
+        state: city.state,
+        country: city.country,
+        lon: city.lon,
+        lat: city.lat,
+    }
+
+    historyArr.push(historyObj);
+    if (historyArr.length > 10) {
+        historyArr.shift();
+    }
+
+    localStorage.setItem("savedSearches", JSON.stringify(historyArr));
+    renderSearchHistory();
 }
 
 function displayWeatherDetails(cityDetails, current, forecast) {
     // reset cardContainer
     cardContainer.innerHTML = '';
-
-    console.log(current);
-
-    // destructure current weather data
-    // const currentWeather = {
-    //     city: current.name,
-    //     temp: current.main.temp,
-    //     humidity: current.main.humidity,
-    //     wind: current.wind.speed
-    // };
-
 
     // get current date using day.js
     const today = dayjs();
@@ -50,7 +66,7 @@ function displayWeatherDetails(cityDetails, current, forecast) {
             </div>
             <div class = "card-body">
                 <p>Temp: ${current.main.temp}°</p>
-                <p>Wind: ${current.main.wind}mph</p>
+                <p>Wind: ${current.wind.speed} mph</p>
                 <p>Humidity: ${current.main.humidity}%</p>
             </div>
         </div>
@@ -77,13 +93,13 @@ function displayWeatherDetails(cityDetails, current, forecast) {
 
         if (slicedTime == '12:00:00') {
             const forecastHTML = `
-                <div class = "card forecastCards">
+                <div class = "card forecastCards mx-1">
                     <div class = "card-header">
                         <h4>${forecastDate.format("MM/DD/YYYY")}</h4>
                     </div>
                     <div class = "card-body">
                         <p>Temp: ${forecastWeather.temp}°</p>
-                        <p>Wind: ${forecastWeather.wind}mph</p>
+                        <p>Wind: ${forecastWeather.wind} mph</p>
                         <p>Humidity: ${forecastWeather.humidity}%</p>
                     </div>
                 </div>`
@@ -112,7 +128,7 @@ async function fetchCityDetails(ev) {
     const fiveDayURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + cityDetails.lat + '&lon=' + cityDetails.lon + '&appid=' + apiKey + '&units=imperial';
     const fiveDayResponse = await fetch(fiveDayURL);
     const forecastDetails = await fiveDayResponse.json();
-    
+
     saveSearch(cityDetails);
     displayWeatherDetails(cityDetails, currentDetails, forecastDetails);
 }
@@ -154,8 +170,11 @@ async function getCityResponse(city) {
     try {
         const response = await fetch(coordinatesQuery);
         const resultsData = await response.json();
+        console.log(resultsData);
         if (resultsData.length > 1) {
             whichCity(resultsData);
+        } else if (resultsData.length === 0) {
+            myModal.show();
         } else {
             // destructure specific city object
             const {
@@ -179,7 +198,7 @@ async function getCityResponse(city) {
             displayWeatherDetails(resultsData[0], currentDetails, forecastDetails);
         }
     } catch (error) {
-        console.error(error);
+        myModal.show();
     }
 }
 
@@ -190,6 +209,7 @@ function handleSearchSubmit(event) {
     const cityInput = document.getElementById('cityInput');
 
     city = cityInput.value;
+
     if (!city) {
         cityInput.setAttribute('placeholder', 'Please enter a valid city');
         return;
@@ -198,5 +218,6 @@ function handleSearchSubmit(event) {
     getCityResponse(city);
 }
 
+renderSearchHistory();
 searchForm.addEventListener('submit', handleSearchSubmit);
 
