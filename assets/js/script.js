@@ -1,21 +1,43 @@
 const apiKey = '75d1b0e8f45a5b8907dd772ac1d040f2';
 const searchForm = document.querySelector('form');
 const cardContainer = document.getElementById('cardContainer');
+let historyArr = [];
 
 //api call
 // const queryURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + apiKey;
 
-function displayWeatherDetails(current, forecast) {
+function saveSearch(city) {
+        // create local storage object and save to local storage
+        const historyObj = {
+            city: city.name,
+            state: city.state,
+            country: city.country,
+            lon: city.lon,
+            lat: city.lat,
+        }
+    
+        historyArr.push(historyObj);
+        if (historyArr.length > 10) {
+            historyArr.shift();
+        }
+    
+        localStorage.setItem("savedSearches", JSON.stringify(historyArr));
+}
+
+function displayWeatherDetails(cityDetails, current, forecast) {
     // reset cardContainer
     cardContainer.innerHTML = '';
 
+    console.log(current);
+
     // destructure current weather data
-    const currentWeather = {
-        city: current.name,
-        temp: current.main.temp,
-        humidity: current.main.humidity,
-        wind: current.wind.speed
-    };
+    // const currentWeather = {
+    //     city: current.name,
+    //     temp: current.main.temp,
+    //     humidity: current.main.humidity,
+    //     wind: current.wind.speed
+    // };
+
 
     // get current date using day.js
     const today = dayjs();
@@ -24,19 +46,18 @@ function displayWeatherDetails(current, forecast) {
     const currentWeatherHTML = `
         <div class = "card w-75 px-2 mb-2">
             <div class = "card-header">
-                <h3>${city} (${today.format("MM/DD/YYYY")})</h3>
+                <h3>${cityDetails.name}, ${cityDetails.state}, ${cityDetails.country} (${today.format("MM/DD/YYYY")})</h3>
             </div>
             <div class = "card-body">
-                <p>Temp: ${currentWeather.temp}°</p>
-                <p>Wind: ${currentWeather.wind}mph</p>
-                <p>Humidity: ${currentWeather.humidity}%</p>
+                <p>Temp: ${current.main.temp}°</p>
+                <p>Wind: ${current.main.wind}mph</p>
+                <p>Humidity: ${current.main.humidity}%</p>
             </div>
         </div>
         <h4>5-Day Forecast:</h4>`
     // insert current weather card HTML
     cardContainer.insertAdjacentHTML('afterbegin', currentWeatherHTML);
 
-    console.log(forecast);
     // destructure forecast weather data, create and insert cards
     for (let i = 0; i < forecast.list.length; i++) {
         // destructure
@@ -53,7 +74,6 @@ function displayWeatherDetails(current, forecast) {
         const forecastDate = dayjs(slicedDate);
 
         const slicedTime = forecastWeather.date.slice(11);
-        console.log(slicedTime);
 
         if (slicedTime == '12:00:00') {
             const forecastHTML = `
@@ -75,26 +95,30 @@ function displayWeatherDetails(current, forecast) {
 
 async function fetchCityDetails(ev) {
     // get specific lat & lon for chosen city
-    const lat = this.dataset.lat;
-    const lon = this.dataset.lon;
-
+    const cityDetails = {
+        lat: this.dataset.lat,
+        lon: this.dataset.lon,
+        name: this.dataset.name,
+        state: this.dataset.state,
+        country: this.dataset.country,
+    }
 
     // api call for current weather data
-    const currentWeatherURL = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`;
+    const currentWeatherURL = `https://api.openweathermap.org/data/2.5/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&appid=${apiKey}&units=imperial`;
     const currentResponse = await fetch(currentWeatherURL);
     const currentDetails = await currentResponse.json();
 
     // api call for 5-day forecast data
-    const fiveDayURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + apiKey + '&units=imperial';
+    const fiveDayURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + cityDetails.lat + '&lon=' + cityDetails.lon + '&appid=' + apiKey + '&units=imperial';
     const fiveDayResponse = await fetch(fiveDayURL);
     const forecastDetails = await fiveDayResponse.json();
-
-    displayWeatherDetails(currentDetails, forecastDetails);
+    
+    saveSearch(cityDetails);
+    displayWeatherDetails(cityDetails, currentDetails, forecastDetails);
 }
 
 function whichCity(response) {
     // reset container from previous searches
-    // document.querySelector('h3').textContent = '';
     cardContainer.innerHTML = '';
 
     cardContainer.insertAdjacentHTML('afterbegin', '<h3>Select City:</h3>');
@@ -110,7 +134,8 @@ function whichCity(response) {
         } = response[i];
 
         const cityBtn = `
-            <button type="button" class = "btn btn-info btn-lg m-1 cityBtns" id = "cityBtn${i}" data-lon = '${lon}' data-lat = '${lat}'>
+            <button type="button" class = "btn btn-info btn-lg m-1 cityBtns" id = "cityBtn${i}" data-lon = '${lon}' data-lat = '${lat}'
+            data-name = '${name}' data-state = '${state}' data-country = '${country}'>
                 ${name}, ${state}, ${country}
             </button>
         `
@@ -148,7 +173,10 @@ async function getCityResponse(city) {
             const fiveDayResponse = await fetch(fiveDayURL);
             const forecastDetails = await fiveDayResponse.json();
 
-            displayWeatherDetails(currentDetails, forecastDetails);
+            saveSearch(resultsData[0]);
+
+            // call function to Display weather details
+            displayWeatherDetails(resultsData[0], currentDetails, forecastDetails);
         }
     } catch (error) {
         console.error(error);
