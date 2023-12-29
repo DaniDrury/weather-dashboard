@@ -69,7 +69,6 @@ function displayWeatherDetails(cityDetails, current, forecast) {
     // get current date using day.js
     const today = dayjs();
 
-    console.log(current);
     // construct current weather card
     const currentWeatherHTML = `
         <div class = "card w-100 mb-2">
@@ -90,7 +89,6 @@ function displayWeatherDetails(cityDetails, current, forecast) {
     // destructure forecast weather data, create and insert cards
     for (let i = 0; i < forecast.list.length; i++) {
         // destructure
-        console.log(forecast);
         const forecastWeather = {
             city: forecast.city.name,
             temp: forecast.list[i].main.temp,
