@@ -2,36 +2,26 @@
     font-family: 'Kanit', sans-serif;
 }
 
-/* html {
-    height: 100%;
-} */
-
 body {
-    height: 100vh;
+    min-height: 100vh;
 }
 
 main {
-    height: 85%;
+    min-height: 90vh;
 }
 
 header {
     background-image: linear-gradient(to right, red , yellow);
-    height: 10%;
 }
 
-footer {
-    height: 5%;
+h3, h5 {
+    display: inline;
 }
 
-.historyBtns {
-
+h4 {
+    min-width: 100%;
 }
 
-.cityBtns {
-    width: 15%;
-}
-
-.forecastCards {
-    max-width: 15%;
-    gap: 1em;
+#selectCityHeader {
+    min-width: 100%;
 }

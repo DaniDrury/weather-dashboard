@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 
-<body>
+<body class="flex-column justify-content-between">
     <header class="d-flex justify-content-center align-items-center">
         <h1 class="fw-bold">Weather Dashboard</h1>
     </header>
@@ -30,7 +30,9 @@
             <section id="searchHistory"></section>
         </aside>
         <article class="col-12 col-md-9 col-lg-10 p-3">
-            <section id="cardContainer" class="row px-3"></section>
+            <section class="container-fluid">
+                <div class = "row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-5" id="cardContainer"></div>
+            </section>
         </article>
     </main>
 

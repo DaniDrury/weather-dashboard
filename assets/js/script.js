@@ -1,7 +1,8 @@
+// Global Variables
 const apiKey = '75d1b0e8f45a5b8907dd772ac1d040f2';
 const searchForm = document.querySelector('form');
 const cardContainer = document.getElementById('cardContainer');
-const historyArr = JSON.parse(localStorage.getItem('savedSearches'));
+let historyArr = JSON.parse(localStorage.getItem('savedSearches'));
 const modalEl = document.getElementById('errorModal');
 const myModal = new bootstrap.Modal(modalEl);
 
@@ -10,25 +11,27 @@ function renderSearchHistory() {
     const searchHistoryContainer = document.getElementById('searchHistory');
     searchHistoryContainer.innerHTML = '';
 
-    for (i = historyArr.length - 1; i >= 0; i--) {
-        const {
-            city,
-            state,
-            country,
-            lon,
-            lat
-        } = historyArr[i];
+    if (historyArr) {
+        for (i = historyArr.length - 1; i >= 0; i--) {
+            const {
+                city,
+                state,
+                country,
+                lon,
+                lat
+            } = historyArr[i];
 
-        const historyBtn = `
-            <button type="button" class = "btn btn-info btn-md my-1 historyBtns w-100" id = "historyBtn${i}" data-lon = '${lon}' data-lat = '${lat}'
+            const historyBtn = `
+            <button type="button" class = "btn btn-secondary btn-md my-1 historyBtns w-100" id = "historyBtn${i}" data-lon = '${lon}' data-lat = '${lat}'
             data-name = '${city}' data-state = '${state}' data-country = '${country}'>
                 ${city}, ${state}, ${country}
             </button>
         `
-        searchHistoryContainer.insertAdjacentHTML('beforeend', historyBtn);
+            searchHistoryContainer.insertAdjacentHTML('beforeend', historyBtn);
 
-        //add eventlistener to the History Buttons
-        document.getElementById(`historyBtn${i}`).addEventListener('click', fetchCityDetails);
+            //add eventlistener to the History Buttons
+            document.getElementById(`historyBtn${i}`).addEventListener('click', fetchCityDetails);
+        }
     }
 }
 
@@ -42,9 +45,13 @@ function saveSearch(city) {
         lat: city.lat,
     }
 
-    historyArr.push(historyObj);
-    if (historyArr.length > 10) {
-        historyArr.shift();
+    if (historyArr) {
+        historyArr.push(historyObj);
+        if (historyArr.length > 10) {
+            historyArr.shift();
+        }
+    } else {
+        historyArr = [historyObj];
     }
 
     localStorage.setItem("savedSearches", JSON.stringify(historyArr));
@@ -55,15 +62,21 @@ function displayWeatherDetails(cityDetails, current, forecast) {
     // reset cardContainer
     cardContainer.innerHTML = '';
 
+    // reset search input box
+    const cityInput = document.getElementById('cityInput');
+    cityInput.value = "";
+
     // get current date using day.js
     const today = dayjs();
 
+    console.log(current);
     // construct current weather card
     const currentWeatherHTML = `
-        <div class = "card w-75 px-2 mb-2">
-            <div class = "card-header">
+        <div class = "card w-100 mb-2">
+            <div class = "card-header bg-info">
                 <h3>${cityDetails.name}, ${cityDetails.state}, ${cityDetails.country} (${today.format("MM/DD/YYYY")})</h3>
-            </div>
+                <img src='https://openweathermap.org/img/wn/${current.weather[0].icon}@2x.png' alt='weather img icon' class="ms-2">
+            </div> 
             <div class = "card-body">
                 <p>Temp: ${current.main.temp}°</p>
                 <p>Wind: ${current.wind.speed} mph</p>
@@ -77,13 +90,14 @@ function displayWeatherDetails(cityDetails, current, forecast) {
     // destructure forecast weather data, create and insert cards
     for (let i = 0; i < forecast.list.length; i++) {
         // destructure
+        console.log(forecast);
         const forecastWeather = {
             city: forecast.city.name,
             temp: forecast.list[i].main.temp,
             humidity: forecast.list[i].main.humidity,
             wind: forecast.list[i].wind.speed,
             date: forecast.list[i].dt_txt,
-            // time: forecast.list[i].dt
+            icon: forecast.list[i].weather[0].icon
         }
 
         const slicedDate = forecastWeather.date.slice(0, 10);
@@ -93,15 +107,18 @@ function displayWeatherDetails(cityDetails, current, forecast) {
 
         if (slicedTime == '12:00:00') {
             const forecastHTML = `
-                <div class = "card forecastCards mx-1">
-                    <div class = "card-header">
-                        <h4>${forecastDate.format("MM/DD/YYYY")}</h4>
+                <div class="col">
+                  <div class = "card forecastCards my-1">
+                    <div class = "card-header bg-info">
+                      <h5>${forecastDate.format("MM/DD/YYYY")}</h5>
+                      <img src='https://openweathermap.org/img/wn/${forecastWeather.icon}.png' alt='weather img icon' class="ms-2">
                     </div>
                     <div class = "card-body">
-                        <p>Temp: ${forecastWeather.temp}°</p>
-                        <p>Wind: ${forecastWeather.wind} mph</p>
-                        <p>Humidity: ${forecastWeather.humidity}%</p>
+                      <p>Temp: ${forecastWeather.temp}°</p>
+                      <p>Wind: ${forecastWeather.wind} mph</p>
+                      <p>Humidity: ${forecastWeather.humidity}%</p>
                     </div>
+                  </div>
                 </div>`
 
             cardContainer.insertAdjacentHTML('beforeend', forecastHTML);
@@ -137,7 +154,7 @@ function whichCity(response) {
     // reset container from previous searches
     cardContainer.innerHTML = '';
 
-    cardContainer.insertAdjacentHTML('afterbegin', '<h3>Select City:</h3>');
+    cardContainer.insertAdjacentHTML('afterbegin', '<h3 id="selectCityHeader">Select City:</h3>');
 
     for (let i = 0; i < response.length; i++) {
         // destructure response object
@@ -170,7 +187,6 @@ async function getCityResponse(city) {
     try {
         const response = await fetch(coordinatesQuery);
         const resultsData = await response.json();
-        console.log(resultsData);
         if (resultsData.length > 1) {
             whichCity(resultsData);
         } else if (resultsData.length === 0) {
