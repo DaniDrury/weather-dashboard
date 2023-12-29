@@ -7,7 +7,10 @@ select the best match for their inquiry. I also learned how to destructure array
 pulling from local storage.
 
 ## Usage
-Navigate to: danidrury.github.io/weather-dashboard
+Github Repo URL: https://github.com/DaniDrury/weather-dashboard
+
+Navigate to: https://danidrury.github.io/weather-dashboard/
+
 Input any city into the search input box. You will be provided with up to 10 possible matches, select the city you want, then weather details for that city are displayed.
 
 ![fullpage screenshot of weather dashboard](./assets/images/screenshot.png)
